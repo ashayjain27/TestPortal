@@ -8,14 +8,14 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
 /**
  * JPA Config class
  * 
@@ -24,14 +24,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
+@EnableJpaRepositories(basePackages = {"com.test.repositories"})
 public class PersistenceJPAConfig {
 
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+	public LocalContainerEntityManagerFactoryBean entityManoagerFactory() {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-		em.setDataSource(dataSource());
+		em.setDataSource(getDataSource());
 
-		// em.setsc(new String[] { "org.baeldung.persistence.model" });
+		//em.(new String[] { "com.test.repositories" });
 		JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		em.setJpaVendorAdapter(vendorAdapter);
 		em.setJpaProperties(additionalProperties());
@@ -39,12 +40,16 @@ public class PersistenceJPAConfig {
 	}
 
 	@Bean
-	public DataSource dataSource() {
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+	public DataSource getDataSource() {
+		JndiDataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
+		DataSource dataSource = dataSourceLookup.getDataSource("jdbc/MyLocalDB");
+		/*DriverManagerDataSource dataSource = (DriverManagerDataSource) dataSourceLookup.getDataSource("jdbc/MyLocalDB");
+
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setUrl("jdbc:mysql://localhost:3306/testdb1");
 		dataSource.setUsername("root");
 		dataSource.setPassword("test");
+*/
 		return dataSource;
 	}
 
